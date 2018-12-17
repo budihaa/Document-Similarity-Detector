@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Datatables;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
 
 class CategoryController extends Controller
 {
@@ -30,28 +30,21 @@ class CategoryController extends Controller
     */
     public function getJSON()
     {
-        $categories = Category::query();
+        $categories = Category::all('id', 'category_name', 'created_at');
 
         return Datatables::of($categories)
             ->addColumn('action', function ($category) {
                 return
-                '<a href="' . route('category.edit', $category->id) . '" class="edit btn btn-sm btn-warning">
-                    <i class="fa fa-lg fa-pencil"></i>
-                </a>
-                <a href="' . route('category.destroy', $category->id) . '" class="delete btn btn-sm btn-danger">
-                    <i class="fa fa-lg fa-trash"></i>
-                </a>';
+                '<button data-url="' . route('category.edit', $category->id) . '" class="edit btn btn-sm btn-warning">
+                    <i class="fas fa-pencil-alt"></i>
+                </button>
+                <button data-url="' . route('category.destroy', $category->id) . '" class="delete btn btn-sm btn-danger">
+                    <i class="fas fa-trash"></i>
+                </button>';
             })
             ->editColumn('created_at', function ($category) {
                 if ($category->created_at !== null) {
-                    return date('d-m-Y / H:i', strtotime($category->created_at));
-                }
-
-                return '-';
-            })
-            ->editColumn('updated_at', function ($category) {
-                if ($category->updated_at !== null) {
-                    return date('d-m-Y / H:i', strtotime($category->updated_at));
+                    return date('d/m/Y - H:i', strtotime($category->created_at));
                 }
 
                 return '-';
@@ -87,10 +80,10 @@ class CategoryController extends Controller
         ];
 
         $customMessages = [
-            'required' => 'Nama kategori tidak boleh kosong',
-            'unique'   => 'Nama kategori telah digunakan',
-            'max'      => 'Nama kategori maksimal 100 karakter',
-            'string'   => 'Nama kategori hanya boleh mengandung karakter atau angka',
+            'required' => 'Nama kategori tidak boleh kosong.',
+            'unique'   => 'Nama kategori telah digunakan.',
+            'max'      => 'Nama kategori maksimal 100 karakter.',
+            'string'   => 'Nama kategori hanya boleh mengandung karakter atau angka.',
         ];
 
         $this->validate($request, $rules, $customMessages);

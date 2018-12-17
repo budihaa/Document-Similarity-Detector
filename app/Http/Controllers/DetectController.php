@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace Http\Controllers;
 
-use DB;
 use App\Models\MasterDocs;
+use DB;
 use Illuminate\Http\Request;
-use function Opis\Closure\unserialize;
-
 use TextAnalysis\Comparisons\CosineSimilarityComparison;
+use function Opis\Closure\unserialize;
 
 class DetectController extends Controller
 {

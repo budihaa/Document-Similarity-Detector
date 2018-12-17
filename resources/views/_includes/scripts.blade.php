@@ -12,6 +12,8 @@
 <script src="{{ asset('vendor/circle-progress/circle-progress.min.js') }}"></script>
 <script src="{{ asset('vendor/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
 <script src="{{ asset('vendor/chartjs/Chart.bundle.min.js') }}"></script>
+<script src="{{ asset('vendor/select2/select2.min.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.32.4/dist/sweetalert2.all.min.js"></script>
 
 <!-- Main JS-->
 <script src="{{ asset('js/main.js') }}"></script>

@@ -2,7 +2,8 @@
 <html lang="en">
 
 <head>
-    @include('_includes/head')
+	<title>Login - DSD</title>
+	@include('_includes/head')
 </head>
 
 <body class="animsition">
