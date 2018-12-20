@@ -83,7 +83,9 @@ $(function() {
 					url: $(this).attr('data-url'),
 					data: { _method: 'DELETE' },
 				})
-					.done(function() {
+					.done(function(data) {
+						console.log(data);
+
 						$('#datatable')
 							.DataTable()
 							.ajax.reload();

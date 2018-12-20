@@ -12,7 +12,10 @@
         "fideloper/proxy": "^4.0",
         "laravel/framework": "5.7.*",
         "laravel/tinker": "^1.0",
-        "yajra/laravel-datatables-oracle": "~8.0"
+        "smalot/pdfparser": "^0.13.2",
+        "yajra/laravel-datatables-oracle": "~8.0",
+        "sastrawi/sastrawi": "^1",
+        "yooper/php-text-analysis": "^1.4"
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^1.0",
