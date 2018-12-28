@@ -23,7 +23,7 @@ class CreateDetectSimilaritiesTable extends Migration
                 ->foreign('master_doc_id')
                 ->references('id')
                 ->on('master_docs');
-            $table->string('result');
+            $table->double('result');
             $table->timestamps();
         });
     }

@@ -6,6 +6,9 @@ Route::group(['middleware' => ['auth']], function () {
     // Logout
     Route::get('/logout', 'Auth\LoginController@logout')->name('logout');
 
+	// Searchbox on header
+	Route::get('/search', 'SearchController@search')->name('searchbox');
+
     // Home
     Route::get('/', 'HomeController@index')->name('home');
 
@@ -19,7 +22,10 @@ Route::group(['middleware' => ['auth']], function () {
 
     // Detect
     Route::get('/detect', 'DetectController@index')->name('detect.index');
+    Route::get('/detect/datatbleJson', 'DetectController@datatbleJson')->name('detect.datatable');
+    Route::get('/detect/create', 'DetectController@create')->name('detect.create');
     Route::get('/getMasterDocs', 'DetectController@getMasterDocs')->name('detect.master-docs');
-    Route::post('/detecting', 'DetectController@upload')->name('detect.upload');
+    Route::get('/detect/result/{id}', 'DetectController@result')->name('detect.result');
+    Route::post('/detect', 'DetectController@store')->name('detect.store');
 });
 

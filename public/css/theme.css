@@ -4551,7 +4551,7 @@ section {
 .tr-shadow {
     -webkit-box-shadow: 0px 10px 20px 0px rgba(0, 0, 0, 0.03);
     -moz-box-shadow: 0px 10px 20px 0px rgba(0, 0, 0, 0.03);
-    box-shadow: 0px 10px 20px 0px rgba(0, 0, 0, 0.03);
+	box-shadow: 0px 10px 20px 0px rgba(0, 0, 0, 0.03);
 }
 
 .table-data__tool {

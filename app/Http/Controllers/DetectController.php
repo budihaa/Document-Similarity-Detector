@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use DataTables;
+use App\Http\Requests\UploadDetect;
+use App\Models\Category;
+use App\Models\Detect;
+use App\Models\DetectSimilarity;
 use App\Models\MasterDocs;
-use DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use TextAnalysis\Comparisons\CosineSimilarityComparison;
 use function Opis\Closure\unserialize;
 
@@ -17,37 +22,53 @@ class DetectController extends Controller
 
     public function index()
     {
-        $categories = DB::table('categories')->select('id', 'category_name')->get();
-        $documents = DB::table('master_docs')->select('id', 'title', 'created_by')->get();
-
-        return view('pages.detect.index', ['categories' => $categories, 'documents' => $documents]);
+        return view('pages.detect.index');
     }
+
+    public function datatbleJson()
+    {
+    	 $Detect = Detect::leftjoin('categories', 'detects.category_id', '=', 'categories.id')
+            ->select(['detects.*', 'categories.category_name']);
+
+        return Datatables::of($Detect)
+            ->addColumn('action', function ($doc) {
+                return
+                '<a href="' . route('detect.result', $doc->id) . '" title="Lihat Detail" class="btn btn-sm btn-info">
+                    <i class="fas fa-lg fa-eye"></i>
+                </a>';
+            })
+            ->editColumn('created_at', function ($doc) {
+                if ($doc->created_at !== null) {
+                    return date('d-m-Y / H:i', strtotime($doc->created_at));
+                }
+
+                return '-';
+            })
+            ->rawColumns(['action'])
+            ->make(true);
+	}
+
+	public function create()
+	{
+		$detect = new Detect();
+		$categories = Category::all('id', 'category_name');
+		$documents = MasterDocs::all('id', 'title', 'created_by');
+
+		return view('pages.detect.form', compact('categories', 'documents', 'detect'));
+	}
 
     public function getMasterDocs(Request $request)
     {
-        $category_id = $request->input('category_id');
+        $masterDocs = MasterDocs::select('id', 'title', 'created_by')->where('category_id', $request->category_id)->get();
 
-        $categories = DB::table('master_docs')
-            ->select('id', 'title', 'created_by')
-            ->where('category_id', $category_id)
-            ->get();
-
-        return $categories->toJson();
+        return $masterDocs->toJson();
     }
 
-    public function upload(Request $request)
+    public function store(UploadDetect $request)
     {
         // ===== I. Tahap 1: Text-Processing dokumen yang di upload =====
         // 1. Validating File
-        $rules = ['file' => 'required|max:10000|mimes:pdf'];
-
-        $customMessages = [
-            'required' => 'Dokumen tidak boleh kosong',
-            'max' => 'Upload file maksimal 10 MB',
-            'mimes' => 'Dokumen harus berupa PDF'
-        ];
-
-        $this->validate($request, $rules, $customMessages);
+        $validated = $request->validated();
 
         // 2. Uploading File
         $uploadedFile = $request->file('file');
@@ -95,17 +116,52 @@ class DetectController extends Controller
 			$samples[] = unserialize($master->text);
 		}
 
-		var_dump($docQuery, $samples);
-
-		// $id[] = 'query';
-		// $samples[] = $docQuery;
-
+		$results = [];
 		$compare = new CosineSimilarityComparison();
 		foreach ($samples as $key => $value) {
-			$cosine = $compare->similarity($docQuery, $value);
-			var_dump($cosine);
+			$results[] = $compare->similarity($docQuery, $value);
 		}
 
-        // return view('pages.detect.table', $params);
+		// ====== III. Tahap 3: Insert record deteksi ======
+		$detect = new Detect();
+		$detect->category_id = $request->category_id;
+		$detect->created_by = $request->created_by;
+		$detect->title = $request->title;
+		$detect->text = serialize($docQuery);
+		$detect->save();
+
+		$insertBatch = [];
+		foreach ($masterDocs as $key => $master) {
+			$insertBatch[] = [
+				'detect_id' => $detect->id,
+				'master_doc_id' => $master->id,
+				'result' => $results[$key],
+				'created_at' => date('Y-m-d H:i:s'),
+				'updated_at' => date('Y-m-d H:i:s')
+			];
+		}
+
+		DB::table('detect_similarities')->insert($insertBatch);
+
+        return redirect()->route('detect.result', ['id' => $detect->id]);
+    }
+
+    public function result($id)
+    {
+    	$detect = Detect::findOrFail($id);
+    	$results = DB::table('detect_similarities')
+    					->leftJoin('master_docs', 'master_docs.id', '=', 'detect_similarities.master_doc_id')
+    					->select('detect_similarities.result', 'master_docs.title', 'master_docs.text', 'master_docs.created_by')
+    					->where('detect_id', $id)
+    					->get();
+    	$garisBatas = 85;
+
+    	$acuanTR[] = unserialize($detect->text);
+    	foreach ($results as $res) {
+    		$acuanTR[] = unserialize($res->text);
+    	}
+    	$maxTR = count(max($acuanTR));
+
+    	return view('pages.detect.result', compact('detect', 'results', 'garisBatas', 'maxTR'));
     }
 }

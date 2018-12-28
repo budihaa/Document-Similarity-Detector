@@ -82,7 +82,7 @@ class MasterDocsController extends Controller
             'category_id' => 'required|integer',
             'created_by'  => 'required|string|max:100',
             'title'       => 'required|string|unique:master_docs|max:100',
-            'file'        => 'required|max:10000|mimes:pdf|file',
+            'file'        => 'required|mimes:pdf|file',
         ];
 
         $customMessages = [
